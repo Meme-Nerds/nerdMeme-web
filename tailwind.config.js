@@ -35,7 +35,7 @@ module.exports = {
         }
       },
       animation: {
-        shutter: 'shutter 3s ease-in-out',
+        shutter: 'shutter 3s ease-in-out infinite',
         quick_shutter: 'quick_shutter 1s ease-in-out',
         grow: 'grow .5s linear'
       }
