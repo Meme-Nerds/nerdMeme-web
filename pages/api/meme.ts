@@ -1,14 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { Meme } from '../../types/types'
 
 type Data = {
   name: string
-}
-
-interface Meme {
-  setting: string,
-  image: string,
-  quote: string,
-  author: string
 }
 
 const getMeme = async() => {

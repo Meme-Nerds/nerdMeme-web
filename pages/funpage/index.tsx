@@ -11,18 +11,36 @@ import React, {
 import MemeDisplay from '../../components/MemeDisplay'
 import { Meme } from '../../types/types'
 import { toPng } from 'html-to-image'
-import { ConstructionOutlined } from '@mui/icons-material'
 
 const funpage = () => {
   const [meme, setMeme] = useState<Meme | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const memeRef = useRef<HTMLDivElement | null>(null)
+  const [memeType, setMemeType]= useState<string>('classic')
 
   const animation = loading ? 'animate-shutter' : ''
+  const classicVariant = memeType === 'classic' ? 'contained' : 'outlined'
+  const customVariant = memeType === 'custom' ? 'contained' : 'outlined'
 
-  const handleClick = () => {
+  type ObjectOfStrings = {
+    [k: string]: string
+  }
+  
+  const testMeme = {
+    setting: 'star-trek',
+    image: 'star-wars',
+    quote: 'harry-potter',
+    author: 'battlestar-galactica'
+  }
+
+  const routes: ObjectOfStrings = {
+    classic: '/api/meme',
+    custom: `api/custom-meme/${testMeme.setting}/${testMeme.image}/${testMeme.quote}/${testMeme.author}`
+  }
+
+  const handleGetMeme = () => {
     setLoading(true)
-    fetch('/api/meme')
+    fetch(routes[memeType])
       .then(newMeme => {
         if(newMeme) {
           return newMeme.json()
@@ -55,8 +73,37 @@ const funpage = () => {
       })
   }, [memeRef])
 
+  const handleMemeType = (e: any): void => {
+    setMemeType(e.target.value)
+  }
+
   return (
     <div className="h-screen flex flex-col justify-center items-center bg-slate-700 p-6">
+      <div className='text-primary text-xl mb-2'>Select you meme mode</div>
+      <div className='flex flex-row'>
+        <div className='mx-3'> 
+          <Button        
+            onClick={handleMemeType}
+            variant={classicVariant}
+            value='classic'
+            name='classic'
+            color='primary'
+          >
+            classic
+          </Button>
+        </div>
+        <div className='mx-3'>
+          <Button
+            onClick={handleMemeType}
+            variant={customVariant}
+            value='custom'
+            name='custom'
+            color='primary'
+          >
+            custom
+          </Button>
+        </div>
+      </div>
       <div className="relative overflow-y-hidden h-2/3 flex flex-row justify-center w-screen my-6 bg-primary">
         { meme && !loading &&
           <div ref={memeRef} className='animate-grow flex justify-center  max-h-contain max-w-fit border-2 border-primary'>
@@ -82,7 +129,7 @@ const funpage = () => {
       <div className='flex flex-row'>
         <div className='m-3'>
           <Button
-            onClick={handleClick} 
+            onClick={handleGetMeme} 
             variant="contained" 
             color='primary'
             size="large"

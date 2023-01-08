@@ -34,7 +34,7 @@ const MemeDisplay:FunctionComponent<Props> = ({ meme }) => {
           <div className="w-11/12 flex flex-col justify-center flex-initial h-14">
             <p className="px-4 text-xl">{ setting }</p>
           </div>
-          <img className='h-3/4 object-contain' src={ image } />
+          <img className='h-3/4 object-contain max-w-[800px]' src={ image } />
           <div className="flex flex-col justify-around flex-1 items-center w-11/12">
             <p 
               className={
