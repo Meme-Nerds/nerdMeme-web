@@ -91,7 +91,6 @@ const funpage = () => {
   }, [customMemeOrder])
 
   const handleGetMeme = () => {
-    console.log('route => ', routes[memeMode])
     setLoading(true)
     fetch(routes[memeMode])
       .then(newMeme => {
@@ -109,18 +108,11 @@ const funpage = () => {
       })
   }
 
-  const handleSetCustomMeme = (e: any) => {
-    const { name } = e.target
-    // const inUseWorlds = Object.values(customMemeOrder)
-    if(name === 'setting') {
-      setCustomMemeOrder((customMemeOrder) => ({ ...customMemeOrder, setting: e.target.value }))  
-    } else if (name === 'image') {
-      setCustomMemeOrder((customMemeOrder) => ({ ...customMemeOrder, image: e.target.value })) 
-    } else if (name === 'quote') {
-      setCustomMemeOrder((customMemeOrder) => ({ ...customMemeOrder, quote: e.target.value })) 
-    } else {
-      setCustomMemeOrder((customMemeOrder) => ({ ...customMemeOrder, author: e.target.value }))
-    }
+  const handleSetCustomMeme = (e: SelectChangeEvent) => {
+    const { name, value } = e.target
+    const newCustomMeme: Meme = { ...customMemeOrder }
+    newCustomMeme[name as keyof Meme] = value
+    setCustomMemeOrder(newCustomMeme)
   }
 
   const handleClearMeme = () => {
@@ -131,7 +123,6 @@ const funpage = () => {
     if (memeRef.current === null) {
       return
     }
-
     toPng(memeRef.current, { cacheBust: true })
       .then((dataUrl) => {
         const link = document.createElement('a')
