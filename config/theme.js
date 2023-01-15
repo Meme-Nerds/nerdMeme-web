@@ -40,7 +40,7 @@ const theme = createTheme({
     },
     secondary: {
       main: "#007090",
-     // dark: "#3A3A3A",
+      dark: "#3A3A3A",
     },
     error: {
       main: "#66101F",
