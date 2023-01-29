@@ -67,10 +67,8 @@ const MemeDisplay:FunctionComponent<Props> = ({
   useEffect(() => {
     setTimeout(() => {
       if(imgRef.current) {
-        console.log('First Condition')
         setImageBoxHeight(imgRef.current.clientHeight)
         setImageBoxWidth(imgRef.current.clientWidth)
-        console.log('IMG-ref ', imgRef.current?.clientWidth)
         if(removeImage) {
           setNoImageYesCanvas(true)
         }
