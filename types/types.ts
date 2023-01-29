@@ -4,3 +4,11 @@ export interface Meme {
   quote: string;
   author: string;
 }
+
+export type NumIndexed = {
+  [k: number]: string,
+}
+
+export type StringIndexed = {
+  [k: string]: string
+}

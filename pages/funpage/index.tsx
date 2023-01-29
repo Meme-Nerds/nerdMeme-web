@@ -3,8 +3,11 @@ import Button from '@mui/material/Button'
 import LinearProgress from '@mui/material/LinearProgress'
 import Box from '@mui/material/Box'
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions'
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
+import Radio from '@mui/material/Radio'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import React, { 
@@ -16,6 +19,8 @@ import React, {
 import MemeDisplay from '../../components/MemeDisplay'
 import { Meme } from '../../types/types'
 import { toPng } from 'html-to-image'
+import { ReactJSXElement } from '@emotion/react/types/jsx-namespace'
+import { FormControlLabel, FormLabel, RadioGroup } from '@mui/material'
 
 type ObjectOfStrings = {
   [k: string]: string
@@ -26,10 +31,12 @@ type OptionsState = {
 }
 
 const funpage = () => {
+  const memeRef = useRef<HTMLDivElement | null>(null)
   const [meme, setMeme] = useState<Meme | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
-  const memeRef = useRef<HTMLDivElement | null>(null)
-  const [memeMode, setMemeMode] = useState<string>('custom')
+  const [memeMode, setMemeMode] = useState<string>('classic')
+  const [memeTheme, setMemeTheme] = useState<string>('original')
+  const [removeTempImage, setRemoveTempImage] = useState<boolean>(false)
   const [customMemeOrder, setCustomMemeOrder] = useState<Meme>({
     setting: '',
     image: '',
@@ -42,10 +49,17 @@ const funpage = () => {
     quoteOptions: [],
     authorOptions: []
   })
+  const [createMemeOrder, setCreateMemeOrder] = useState<Meme>({
+    setting: '',
+    image: '',
+    quote: '',
+    author: ''
+  })
 
   const animation = loading ? 'animate-shutter' : ''
   const classicVariant = memeMode === 'classic' ? 'contained' : 'outlined'
   const customVariant = memeMode === 'custom' ? 'contained' : 'outlined'
+  const createVariant = memeMode === 'create' ? 'contained' : 'outlined'
 
   const routes: ObjectOfStrings = {
     classic: '/api/meme',
@@ -62,12 +76,25 @@ const funpage = () => {
     Xena_Warrior_Princess: 'xena'
   }
 
-  const getOptions = (theseSettings: string) => {
+  const fontFamilies: ObjectOfStrings = {
+    original: 'font-original',
+    olde: 'font-olde',
+    arcade: 'font-arcade',
+    spacey: 'font-spacey',
+    fancy: 'font-fancy'
+  }
+
+  const getOptions = (theseSettings: string): ReactJSXElement[] => {
     const inUseWorlds: string[] = Object.values(customMemeOrder)
     return Object.entries(worlds).filter(world => (
       !inUseWorlds.includes(world[1]) || world[1] === customMemeOrder[theseSettings as keyof Meme]
     )).map(option => (
-      <MenuItem value={option[1]} key={option[0]}>{option[0].replaceAll('_', ' ')}</MenuItem>
+      <MenuItem 
+        value={option[1]} 
+        key={option[0]}
+      >
+        {option[0].replaceAll('_', ' ')}
+      </MenuItem>
     ))
   }
 
@@ -78,52 +105,63 @@ const funpage = () => {
       quoteOptions: [],
       authorOptions: []
     }
-    const optionToMemePart: ObjectOfStrings = {
+    const optionToMemeComp: ObjectOfStrings = {
       settingOptions: 'setting',
       imageOptions: 'image',
       quoteOptions: 'quote',
       authorOptions: 'author'
     }
     Object.keys(customOptions).forEach(optionName => {
-      newState[optionName] = getOptions(optionToMemePart[optionName])
+      newState[optionName] = getOptions(optionToMemeComp[optionName])
     })
     setCustomOptions(newState)
   }, [customMemeOrder])
 
-  const handleGetMeme = () => {
+  const handleGetMeme = (): void => {
     setLoading(true)
-    fetch(routes[memeMode])
-      .then(newMeme => {
-        if(newMeme) {
-          return newMeme.json()
-        }
-      })
-      .then(finalMeme => {
-        setMeme(finalMeme)   
-      })
-      .finally(() => {
-        setTimeout(() => {
-          setLoading(false)
-        }, 3000)
-      })
+    if(memeMode !== 'create') {
+      fetch(routes[memeMode])
+        .then(newMeme => {
+          if(newMeme) {
+            return newMeme.json()
+          }
+        })
+        .then(finalMeme => {
+          setMeme(finalMeme)   
+        })
+        .finally(() => {
+          setTimeout(() => {
+            setLoading(false)
+          }, 3000)
+        })
+    } else {
+      setMeme(createMemeOrder)
+      setTimeout(() => {
+        setLoading(false)
+      }, 3000)
+    }
   }
 
-  const handleSetCustomMeme = (e: SelectChangeEvent) => {
+  const handleSetCustomMeme = (e: SelectChangeEvent): void => {
     const { name, value } = e.target
     const newCustomMeme: Meme = { ...customMemeOrder }
     newCustomMeme[name as keyof Meme] = value
     setCustomMemeOrder(newCustomMeme)
   }
 
-  const handleClearMeme = () => {
+  const handleClearMeme = (): void => {
     setMeme(null)
+    setMemeTheme('original')
   }
 
   const HandleDownload = useCallback(() => {
     if (memeRef.current === null) {
       return
     }
-    toPng(memeRef.current, { cacheBust: true })
+    toPng(memeRef.current, { 
+      cacheBust: true, 
+      imagePlaceholder: createMemeOrder.image 
+    })
       .then((dataUrl) => {
         const link = document.createElement('a')
         link.download = 'nerdMeme.png'
@@ -135,13 +173,29 @@ const funpage = () => {
       })
   }, [memeRef])
 
+  const handleCreateChange = (e: any) => {
+    const { name, value } = e.target
+      const newCreatedMeme: Meme = { ...createMemeOrder }
+      newCreatedMeme[name as keyof Meme] = name === 'image'
+        ? URL.createObjectURL(e.target.files[0])
+        : value
+      setCreateMemeOrder(newCreatedMeme)
+  }
+
   const handleMemeType = (e: any): void => {
     if(meme) setMeme(null)
     setMemeMode(e.target.value)
+    if(e.target.value === 'create') setRemoveTempImage(true)
+    else setRemoveTempImage(false)
+  }
+
+  const handleMemeTheme = (e: any): void => {
+    setMemeTheme(e.target.value)
   }
 
   return (
     <div className="h-screen flex flex-col justify-center items-center bg-slate-700 p-6">
+      <h1 className={`${fontFamilies[memeTheme]} text-warning text-6xl`}>nerdMeme</h1>
       <div className='text-primary text-xl mb-2'>Select your meme mode</div>
       <div className='flex flex-row'>
         <div className='mx-3'> 
@@ -166,6 +220,17 @@ const funpage = () => {
             custom
           </Button>
         </div>
+        <div className='mx-3'>
+          <Button
+            onClick={handleMemeType}
+            variant={createVariant}
+            value='create'
+            name='create'
+            color='primary'
+          >
+            create
+          </Button>
+        </div>
       </div>
       <div className='h-10 pt-4'>
         { meme &&
@@ -178,19 +243,129 @@ const funpage = () => {
         }
       </div>
       <div className="relative overflow-y-hidden h-2/3 flex flex-row justify-center w-screen my-6 bg-primary">
+        { !meme && !loading && 
+          <div className='mx-5 flex flex-col justify-center'>
+            <div className='h-2/3 flex items-center bg-slate-700 p-8 rounded-xl border-2 border-warning'>
+            <FormControl>
+              <FormLabel color='primary'>Select a meme-theme</FormLabel>
+              <RadioGroup
+                defaultValue="original"
+                name='theme-selector'
+                onChange={handleMemeTheme}
+              >
+                <FormControlLabel 
+                  value='original'
+                  className='my-2'
+                  color='primary' 
+                  label='original'
+                  sx={{
+                    color: "#01A7C2",
+                  }}
+                  control={
+                    <Radio 
+                      color='primary'
+                      sx={{
+                        color: "#01A7C2",
+                        '&.Mui-checked': {
+                          color: '#E76F51',
+                        },
+                      }} 
+                    />
+                  }
+                />
+                <FormControlLabel 
+                  value='olde' 
+                  className='my-2'
+                  label='olde'
+                  sx={{
+                    color: "#01A7C2",
+                  }}
+                  control={
+                    <Radio
+                      sx={{
+                        color: "#01A7C2",
+                        '&.Mui-checked': {
+                          color: '#E76F51',
+                        },
+                      }}
+                    />
+                  }
+                />
+                <FormControlLabel 
+                  value='arcade'
+                  className='my-2' 
+                  label='arcade'
+                  sx={{
+                    color: "#01A7C2",
+                  }}
+                  control={
+                    <Radio 
+                      color='primary'
+                      sx={{
+                        color: "#01A7C2",
+                        '&.Mui-checked': {
+                          color: '#E76F51',
+                        },
+                      }} 
+                    />
+                  }
+                />
+                <FormControlLabel 
+                  value='spacey' 
+                  className='my-2'
+                  label='spacey'
+                  sx={{
+                    color: "#01A7C2",
+                  }}
+                  control={
+                    <Radio 
+                      color='primary'
+                      sx={{
+                        color: "#01A7C2",
+                        '&.Mui-checked': {
+                          color: '#E76F51',
+                        },
+                      }} 
+                    />
+                  }
+                />
+                <FormControlLabel 
+                  value='fancy' 
+                  className='my-2'
+                  label='fancy'
+                  sx={{
+                    color: "#01A7C2",
+                  }}
+                  control={
+                    <Radio 
+                      sx={{
+                        color: "#01A7C2",
+                        '&.Mui-checked': {
+                          color: '#E76F51',
+                        },
+                      }} 
+                    />
+                  }
+                />
+              </RadioGroup>
+            </FormControl>
+            </div>
+          </div>
+        }
         { memeMode === 'custom' && !meme && ! loading &&
-          <div className="flex flex-col justify-center">
+          <div className="mx-5 flex flex-col justify-center">
             <div className='text-xxl text-secondary'>Select a Universe for each category!</div>
             <div className='my-4 min-w-[150px]'>
               <FormControl fullWidth>
-                <InputLabel id='settings_label' >Setting</InputLabel>
+                <InputLabel color='secondary' id='settings_label' >Setting</InputLabel>
                 <Select
                   labelId='settings_label'
                   id='settings_select'
-                  label='choose a setting'
+                  label='Setting'
                   name='setting'
                   value={customMemeOrder.setting}
                   onChange={handleSetCustomMeme}
+                  color='secondary'
                 >
                   { customOptions.settingOptions }
                 </Select>
@@ -198,13 +373,15 @@ const funpage = () => {
             </div>
             <div className='my-4 min-w-[150px]'>
               <FormControl fullWidth>
-                <InputLabel id='images_label' >Image</InputLabel>
+                <InputLabel color='secondary' id='images_label' >Image</InputLabel>
                 <Select
                   labelId='images_label'
                   id='images_select'
+                  label='Image'
                   name='image'
                   value={customMemeOrder.image}
                   onChange={handleSetCustomMeme}
+                  color='secondary'
                 >
                   { customOptions.imageOptions }
                 </Select>
@@ -212,13 +389,15 @@ const funpage = () => {
             </div>
             <div className='my-4 min-w-[150px]'>
               <FormControl fullWidth>
-                <InputLabel id='quotes_label' >Quote</InputLabel>
+                <InputLabel color='secondary' id='quotes_label' >Quote</InputLabel>
                 <Select
                   labelId='quotes_label'
                   id='quotes_select'
+                  label='Quote'
                   name='quote'
                   value={customMemeOrder.quote}
                   onChange={handleSetCustomMeme}
+                  color='secondary'
                 >
                   { customOptions.quoteOptions }
                 </Select>
@@ -226,13 +405,15 @@ const funpage = () => {
             </div>
             <div className='my-4 min-w-[150px]'>
               <FormControl fullWidth>
-                <InputLabel id='authors_label' >Quote</InputLabel>
+                <InputLabel color='secondary' id='authors_label' >Author</InputLabel>
                 <Select
                   labelId='authors_label'
                   id='authors_select'
+                  label='Author'
                   name='author'
                   value={customMemeOrder.author}
                   onChange={handleSetCustomMeme}
+                  color='secondary'
                 >
                   { customOptions.authorOptions }
                 </Select>
@@ -240,9 +421,73 @@ const funpage = () => {
             </div>
           </div>
         }
+        { memeMode === 'create' && !meme && ! loading && 
+          <div className='mx-5 flex flex-col items-center justify-center'>
+            <div className='my-4 min-w-[300px]'>
+              <TextField 
+                id="create_setting"
+                name='setting'
+                label='setting'
+                variant='filled'
+                value={createMemeOrder.setting}
+                onChange={handleCreateChange}
+                color='secondary'
+                fullWidth
+              />
+            </div>
+            <div className='my-4 min-w-[300px]'>
+              <Button
+                variant='contained'
+                color='info'
+                component='label'
+                fullWidth
+                endIcon={!createMemeOrder.image
+                  ? <FileUploadIcon fontSize="large" color="secondary" />
+                  : <CheckCircleIcon fontSize="large" color="warning" />
+                }
+              >
+                Upload Image
+                <input
+                  name='image'
+                  type='file'
+                  hidden
+                  onChange={handleCreateChange}
+                />
+              </Button>
+            </div>
+            <div className='my-4 min-w-[300px]'>
+              <TextField 
+                id="create_quote"
+                name='quote'
+                label='quote'
+                variant='filled'
+                value={createMemeOrder.quote}
+                onChange={handleCreateChange}
+                color='secondary'
+                fullWidth
+              />
+            </div> 
+            <div className='my-4 min-w-[300px]'>
+              <TextField 
+                id="create_author"
+                name='author'
+                label='author'
+                variant='filled'
+                value={createMemeOrder.author}
+                onChange={handleCreateChange}
+                color='secondary'
+                fullWidth
+              />
+            </div>  
+          </div>
+        }
         { meme && !loading &&
           <div ref={memeRef} className='animate-grow flex justify-center  max-h-contain max-w-fit border-2 border-primary'>
-            <MemeDisplay meme={meme} />
+            <MemeDisplay 
+              meme={meme} 
+              removeImage={removeTempImage}
+              memeTheme={memeTheme} 
+            />
           </div>
         }
         { loading && 
@@ -268,7 +513,7 @@ const funpage = () => {
             variant="contained" 
             color='primary'
             size="large"
-            endIcon={<EmojiEmotionsIcon />}
+            endIcon={<EmojiEmotionsIcon color="warning" />}
           >
             get a meme!
           </Button>
@@ -276,8 +521,8 @@ const funpage = () => {
         <div className='m-3'>
           <Button 
             onClick={HandleDownload} 
-            variant="contained" 
-            color='error'
+            variant="outlined" 
+            color='primary'
             size="large"
           >
             download
@@ -287,11 +532,5 @@ const funpage = () => {
     </div>
   )
 }
-
-// export const getStaticProps = async () => {
-//   return {
-//     props: {}
-//   }
-// }
 
 export default funpage
