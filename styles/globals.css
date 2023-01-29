@@ -3,6 +3,27 @@
 @tailwind utilities;
 
 
+@font-face {
+  font-family: 'olde';
+  src: url('../public/fonts/Seagram.ttf')
+}
+
+@font-face {
+  font-family: 'spacey';
+  src: url('../public/fonts/spacerangerital.ttf')
+}
+
+@font-face {
+  font-family: 'arcade';
+  src: url('../public/fonts/Arcade-Classic.ttf');
+}
+
+@font-face {
+  font-family: 'fancy';
+  src: url('../public/fonts/The-Blacklist.ttf');
+}
+
+
 /* For whitespace on the sides varying with width */
 .padding-alignment {
   @apply sm:px-24 px-2;

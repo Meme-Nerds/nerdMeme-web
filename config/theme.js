@@ -9,7 +9,7 @@ const themeConstants = {
   },
   secondary: {
     main: "#007090",
-   // dark: "#3A3A3A",
+   dark: "#3A3A3A",
   },
   error: {
     main: "#66101F",
@@ -33,14 +33,22 @@ const themeConstants = {
 // Check here for more configurations https://material-ui.com/customization/default-theme/
 
 const theme = createTheme({
+  mode: 'dark',
   palette: {
     primary: {
       main: "#01A7C2",
       dark: "#01A7C2",
+      contrastText: "#1f2937"
     },
     secondary: {
-      main: "#007090",
+      main: "#1f2937",
+      contrastText: "#01A7C2"
+    },
+    info: {
+      // main: "#007090",
+      main: "#018DA2",
       dark: "#3A3A3A",
+      contrastText: "#1f2937"
     },
     error: {
       main: "#66101F",
@@ -54,6 +62,13 @@ const theme = createTheme({
   breakpoints: {
     values: themeConstants.breakpoints,
   },
+  components: {
+    MuiFormControlLabel: {
+      styleOverrides: {
+        color: "#01A7C2"
+      }
+    }
+  }
 });
 
 export default theme;

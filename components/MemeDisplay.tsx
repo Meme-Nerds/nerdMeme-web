@@ -1,82 +1,126 @@
 import { FunctionComponent, useEffect, useRef, useState } from "react"
-import { Meme } from "../types/types"
+import { Meme, StringIndexed, NumIndexed } from "../types/types"
 import Canvas from './Canvas'
 
 type Props = {
   meme: Meme,
   removeImage: boolean,
-  memeMode: string
+  memeTheme: string,
 }
 
 const MemeDisplay:FunctionComponent<Props> = ({ 
   meme, 
-  removeImage, 
-  memeMode 
+  removeImage,
+  memeTheme
 }) => {
   const { setting, image, quote, author } = meme
-  const [quoteLength, setQuoteLength] = useState<1 | 2 | 3 | 4>(1)
   const imageBoxRef = useRef<HTMLDivElement | null>(null)
+  const imgRef = useRef<HTMLImageElement | null>(null)
   const [imageBoxHeight, setImageBoxHeight] = useState<number>(0)
   const [imageBoxWidth, setImageBoxWidth] = useState<number>(0)
+  const [quoteSize, setQuoteSize] = useState<string | null>(null)
+  const [noImageYesCanvas, setNoImageYesCanvas] = useState<boolean>(false)
+
+  const fontFamilies: StringIndexed = {
+    original: 'font-original',
+    olde: 'font-olde',
+    arcade: 'font-arcade',
+    spacey: 'font-spacey',
+    fancy: 'font-fancy'
+  }
+
+  const textSizes: NumIndexed = {
+    1: 'text-xl',
+    2: 'text-2xl',
+    3: 'text-3xl',
+    4: 'text-4xl',
+    5: 'text-5xl'
+  }
   
-  const imageDisplay: string = memeMode === 'create'
-    ? 'hidden'
-    : ''
-  
-  const quoteSizes = {
-    1: 'text-4xl',
-    2: 'text-3xl',
-    3: 'text-2xl',
-    4: 'text-xl'
+  const textColors: StringIndexed = {
+    original: 'text-original',
+    olde: 'text-olde',
+    arcade: 'text-arcade',
+    spacey: 'text-spacey',
+    fancy: 'text-fancy'
+  }
+
+  const getQuoteSize = ():string => {
+    let qSize: number = 0
+    const qLength = quote.length
+    const iWidth = imageBoxWidth
+    if(qLength <= 20) qSize = 4
+    else if(qLength <= 50) qSize = 3
+    else if(qLength <= 75) qSize = 2
+    else qSize = 1
+    
+    if(iWidth >= 500 && qLength <= 125 && qSize < 4) qSize ++
+    if(iWidth < 350 && qSize > 1) qSize --
+    if(iWidth > 700 && qLength <= 50 && qSize < 4) qSize ++
+
+    // console.log('length ', qLength)
+    // console.log('width ', iWidth)
+    // console.log('size ', qSize)
+    return textSizes[qSize]
   }
 
   useEffect(() => {
-    if(quote.length <= 25) {
-      setQuoteLength(1)
-    } else if(quote.length <= 50) {
-      setQuoteLength(2)
-    } else if(quote.length <= 100) {
-      setQuoteLength(3)
-    } else {
-      setQuoteLength(4)
-    }
-  }, [quote])
+    setTimeout(() => {
+      if(imgRef.current) {
+        console.log('First Condition')
+        setImageBoxHeight(imgRef.current.clientHeight)
+        setImageBoxWidth(imgRef.current.clientWidth)
+        console.log('IMG-ref ', imgRef.current?.clientWidth)
+        if(removeImage) {
+          setNoImageYesCanvas(true)
+        }
+      }
+    }, 200)
+  }, [])
 
   useEffect(() => {
-    if(imageBoxRef.current) {
-      setImageBoxHeight(imageBoxRef.current.clientHeight)
-      setImageBoxWidth(imageBoxRef.current.clientWidth)
-    }
-  }, [imageBoxRef])
+    setQuoteSize(getQuoteSize())
+  }, [imageBoxWidth])
 
   return (
-    <div className="relative max-h-contain min-h-fit max-w-fit bg-black text-white">
+    <div className="overflow-x-hidden relative max-h-contain min-h-fit max-w-fit bg-black text-white">
         <div className="h-full max-w-contain flex flex-col justify-evenly items-center">
           <div className="w-11/12 flex flex-col justify-center flex-initial h-14">
             <p className="px-4 text-xl">{ setting }</p>
           </div>
-            {!removeImage &&
-              <img 
-                className={`h-3/4 object-contain max-w-[800px] ${imageDisplay}`}
+          {!noImageYesCanvas &&
+            <div
+              ref={imgRef}
+              className={`
+                flex max-h-[40vh] h-2/3 max-w-[800px] 
+              `}
+            >
+              <img
+                className="max-h-[100%] max-w-fill object-cover"
                 src={image} 
               />
-            }
+            </div>
+          }
+          {noImageYesCanvas &&
             <div 
               ref={imageBoxRef} 
-              className="h-3/4 w-full object-contain max-w-[800px]"
+              className={`
+                flex justify-center h-3/4 w-full object-contain max-w-[800px]
+              `}
             >
-            {memeMode === 'create' &&
-              <Canvas 
-                dataUrl={image} 
-                imageBoxHeight={imageBoxHeight} 
-                imageBoxWidth={imageBoxWidth} 
-              />
-            }
-          </div>
-          <div className="flex flex-col justify-around flex-1 items-center w-11/12">
+                <Canvas 
+                  dataUrl={image} 
+                  imageBoxHeight={imageBoxHeight} 
+                  imageBoxWidth={imageBoxWidth} 
+                />
+            </div>
+          }
+          <div 
+            className="flex flex-col justify-around flex-1 items-center w-11/12"
+          >
             <p 
               className={
-                `${quoteSizes[quoteLength]}
+                `${quoteSize} ${fontFamilies[memeTheme]} ${textColors[memeTheme]}
                 max-w-[36rem] whitespace-normal text-center px-4`
               } 
             >

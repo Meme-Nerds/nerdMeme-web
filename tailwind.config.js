@@ -18,6 +18,11 @@ module.exports = {
         secondary_alpha: 'rgba(0, 112, 144, .6)',
         error: '#66101F',
         warning: '#E76F51',
+        original: '#fff',
+        olde: '#66101F',
+        spacey: 'rgb(0, 112, 144)',
+        arcade: '#84C318',
+        fancy: '#E76F51'
       },
       keyframes: {
         shutter: {
@@ -38,6 +43,13 @@ module.exports = {
         shutter: 'shutter 3s ease-in-out infinite',
         quick_shutter: 'quick_shutter 1s ease-in-out',
         grow: 'grow .5s linear'
+      },
+      fontFamily: {
+        original: ['ui-sans-serif', 'system-ui'],
+        olde: ['olde'],
+        spacey: ['spacey'],
+        arcade: ['arcade'],
+        fancy: ['fancy'],
       }
     },
   },
