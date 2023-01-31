@@ -5,6 +5,8 @@ import Box from '@mui/material/Box'
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions'
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DownloadIcon from '@mui/icons-material/Download';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import Radio from '@mui/material/Radio'
@@ -98,6 +100,11 @@ const funpage = () => {
     ))
   }
 
+  const adjustForFont = (quote: string): string => {
+    if(memeTheme === 'arcade') return quote.replaceAll(' ', '\u00A0 \u00A0')
+    else return quote
+  }
+
   useEffect(() => {
     const newState: OptionsState = {
       settingOptions: [],
@@ -119,6 +126,7 @@ const funpage = () => {
 
   const handleGetMeme = (): void => {
     setLoading(true)
+    let freshMeme = false; 
     if(memeMode !== 'create') {
       fetch(routes[memeMode])
         .then(newMeme => {
@@ -127,18 +135,34 @@ const funpage = () => {
           }
         })
         .then(finalMeme => {
-          setMeme(finalMeme)   
+          const newStuff: string[] = Object.values(finalMeme)
+          const oldStuff: string[] = meme ? Object.values(meme) : ['']
+          const noRepeats: boolean = newStuff.every(val => !oldStuff.includes(val))
+          if(meme && !noRepeats) {
+            throw 'oops repeated meme element! Stand by for a fresh meme!'
+          } else {
+            setMeme({
+              ...finalMeme,
+              quote: adjustForFont(finalMeme.quote)
+            })   
+            freshMeme = true
+          }
         })
         .finally(() => {
-          setTimeout(() => {
-            setLoading(false)
-          }, 3000)
+          if(freshMeme) {
+            setTimeout(() => {
+              setLoading(false)
+            }, 3000)
+          } else {
+            handleGetMeme()
+          }
         })
     } else {
+      freshMeme = true
       setMeme(createMemeOrder)
       setTimeout(() => {
         setLoading(false)
-      }, 3000)
+      }, 2000)
     }
   }
 
@@ -151,7 +175,6 @@ const funpage = () => {
 
   const handleClearMeme = (): void => {
     setMeme(null)
-    setMemeTheme('original')
   }
 
   const HandleDownload = useCallback(() => {
@@ -194,8 +217,12 @@ const funpage = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col justify-center items-center bg-slate-700 p-6">
-      <h1 className={`${fontFamilies[memeTheme]} text-warning text-6xl`}>nerdMeme</h1>
+    <div className="h-screen flex flex-col justify-center items-center bg-slate-800 p-6">
+      <h1 className={`${fontFamilies[memeTheme]} text-warning text-6xl mb-4 `}>nerdMeme</h1>
+      <p className='text-primary'>
+        first time here?
+        <HelpOutlineIcon fontSize="medium" color="warning" className="ml-2 mb-1" />  
+      </p>
       <div className='text-primary text-xl mb-2'>Select your meme mode</div>
       <div className='flex flex-row'>
         <div className='mx-3'> 
@@ -238,16 +265,17 @@ const funpage = () => {
             variant='text' color='primary' 
             onClick={handleClearMeme}
           >
-            {`Clear ${memeMode} meme`}
+            {`Return to ${memeMode} meme-menu`}
           </Button>
         }
       </div>
-      <div className="relative overflow-y-hidden h-2/3 flex flex-row justify-center w-screen my-6 bg-primary">
+      <div className="px-0 relative overflow-hidden h-2/3 flex flex-row justify-center w-screen my-6 bg-primary ">
         { !meme && !loading && 
-          <div className='mx-5 flex flex-col justify-center'>
-            <div className='h-2/3 flex items-center bg-slate-700 p-8 rounded-xl border-2 border-warning'>
+          <div className='mx-8 flex flex-col justify-center'>
+            <div className='h-2/3 flex items-center'>
             <FormControl>
-              <FormLabel color='primary'>Select a meme-theme</FormLabel>
+              {/* <FormLabel color='primary'>Select a meme-theme</FormLabel> */}
+              <p className='text-xl'>Select a meme-theme</p>
               <RadioGroup
                 defaultValue="original"
                 name='theme-selector'
@@ -258,14 +286,9 @@ const funpage = () => {
                   className='my-2'
                   color='primary' 
                   label='original'
-                  sx={{
-                    color: "#01A7C2",
-                  }}
                   control={
                     <Radio 
-                      color='primary'
                       sx={{
-                        color: "#01A7C2",
                         '&.Mui-checked': {
                           color: '#E76F51',
                         },
@@ -277,13 +300,9 @@ const funpage = () => {
                   value='olde' 
                   className='my-2'
                   label='olde'
-                  sx={{
-                    color: "#01A7C2",
-                  }}
                   control={
                     <Radio
                       sx={{
-                        color: "#01A7C2",
                         '&.Mui-checked': {
                           color: '#E76F51',
                         },
@@ -295,14 +314,9 @@ const funpage = () => {
                   value='arcade'
                   className='my-2' 
                   label='arcade'
-                  sx={{
-                    color: "#01A7C2",
-                  }}
                   control={
                     <Radio 
-                      color='primary'
                       sx={{
-                        color: "#01A7C2",
                         '&.Mui-checked': {
                           color: '#E76F51',
                         },
@@ -314,14 +328,9 @@ const funpage = () => {
                   value='spacey' 
                   className='my-2'
                   label='spacey'
-                  sx={{
-                    color: "#01A7C2",
-                  }}
                   control={
                     <Radio 
-                      color='primary'
                       sx={{
-                        color: "#01A7C2",
                         '&.Mui-checked': {
                           color: '#E76F51',
                         },
@@ -333,13 +342,9 @@ const funpage = () => {
                   value='fancy' 
                   className='my-2'
                   label='fancy'
-                  sx={{
-                    color: "#01A7C2",
-                  }}
                   control={
                     <Radio 
                       sx={{
-                        color: "#01A7C2",
                         '&.Mui-checked': {
                           color: '#E76F51',
                         },
@@ -353,8 +358,8 @@ const funpage = () => {
           </div>
         }
         { memeMode === 'custom' && !meme && ! loading &&
-          <div className="mx-5 flex flex-col justify-center">
-            <div className='text-xxl text-secondary'>Select a Universe for each category!</div>
+          <div className="mx-8 flex flex-col justify-center">
+            <div className='text-xl'>Select a universe for each category!</div>
             <div className='my-4 min-w-[150px]'>
               <FormControl fullWidth>
                 <InputLabel color='secondary' id='settings_label' >Setting</InputLabel>
@@ -422,8 +427,9 @@ const funpage = () => {
           </div>
         }
         { memeMode === 'create' && !meme && ! loading && 
-          <div className='mx-5 flex flex-col items-center justify-center'>
+          <div className='mx-8 flex flex-col items-center justify-center'>
             <div className='my-4 min-w-[300px]'>
+              <p className="text-xl">Add your own stuff!!!</p>
               <TextField 
                 id="create_setting"
                 name='setting'
@@ -501,7 +507,7 @@ const funpage = () => {
         <div 
           className={
             `
-            transition-all absolute translate-y-[-200vh] bg-secondary_alpha w-full h-[200vh]
+            transition-all absolute translate-y-[-200vh] bg-secondary_alpha w-screen h-[200vh]
             ${animation}`
             } 
         ></div>
@@ -510,7 +516,7 @@ const funpage = () => {
         <div className='m-3'>
           <Button
             onClick={handleGetMeme} 
-            variant="contained" 
+            variant="outlined" 
             color='primary'
             size="large"
             endIcon={<EmojiEmotionsIcon color="warning" />}
@@ -524,6 +530,7 @@ const funpage = () => {
             variant="outlined" 
             color='primary'
             size="large"
+            endIcon={<DownloadIcon color="warning" />}
           >
             download
           </Button>

@@ -45,22 +45,34 @@ const MemeDisplay:FunctionComponent<Props> = ({
     fancy: 'text-fancy'
   }
 
+  const secondaryTextColors: StringIndexed = {
+    original: 'text-original',
+    olde: 'text-primary',
+    arcade: 'text-spacey',
+    spacey: 'text-warning',
+    fancy: 'text-primary'
+  }
+
   const getQuoteSize = ():string => {
     let qSize: number = 0
     const qLength = quote.length
     const iWidth = imageBoxWidth
-    if(qLength <= 20) qSize = 4
-    else if(qLength <= 50) qSize = 3
-    else if(qLength <= 75) qSize = 2
-    else qSize = 1
+    if(qLength <= 20) qSize = 5
+    else if(qLength <= 50) qSize = 4
+    else if(qLength <= 75) qSize = 3
+    else qSize = 2
+
+    if(memeTheme === 'olde') qSize +=1
     
-    if(iWidth >= 500 && qLength <= 125 && qSize < 4) qSize ++
+    if(iWidth >= 600 && qLength <= 60 && qSize < 4) qSize ++
+    if(iWidth >= 500 && qLength <= 35 && qSize < 4) qSize ++
     if(iWidth < 350 && qSize > 1) qSize --
     if(iWidth > 700 && qLength <= 50 && qSize < 4) qSize ++
+    if(iWidth < 700 && qLength > 125 && qSize > 1) qSize --
 
-    // console.log('length ', qLength)
-    // console.log('width ', iWidth)
-    // console.log('size ', qSize)
+    console.log('length ', qLength)
+    console.log('width ', iWidth)
+    console.log('size ', qSize)
     return textSizes[qSize]
   }
 
@@ -84,7 +96,7 @@ const MemeDisplay:FunctionComponent<Props> = ({
     <div className="overflow-x-hidden relative max-h-contain min-h-fit max-w-fit bg-black text-white">
         <div className="h-full max-w-contain flex flex-col justify-evenly items-center">
           <div className="w-11/12 flex flex-col justify-center flex-initial h-14">
-            <p className="px-4 text-xl">{ setting }</p>
+            <p className={`${secondaryTextColors[memeTheme]} px-4 text-xl`}>{ setting }</p>
           </div>
           {!noImageYesCanvas &&
             <div
@@ -114,7 +126,7 @@ const MemeDisplay:FunctionComponent<Props> = ({
             </div>
           }
           <div 
-            className="flex flex-col justify-around flex-1 items-center w-11/12"
+            className="flex flex-col justify-around space-y-2 items-center w-11/12"
           >
             <p 
               className={
@@ -124,7 +136,7 @@ const MemeDisplay:FunctionComponent<Props> = ({
             >
                 "{ quote }"
             </p>
-            <p className="text-xl px-6 w-11/12">~ { author }</p> 
+            <p className={`${secondaryTextColors[memeTheme]} text-xl px-6 w-11/12`}>~ { author }</p> 
           </div>
         </div>
         <div className="absolute top-0 translate-y-[-100%] border-2 border-secondary h-full w-full bg-secondary_alpha animate-quick_shutter"></div>
