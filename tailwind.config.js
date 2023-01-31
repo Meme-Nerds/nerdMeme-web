@@ -16,10 +16,10 @@ module.exports = {
         primary: '#01A7C2',
         secondary: 'rgb(0, 112, 144)',
         secondary_alpha: 'rgba(0, 112, 144, .6)',
-        error: '#66101F',
+        error: '#7c1325',
         warning: '#E76F51',
         original: '#fff',
-        olde: '#66101F',
+        olde: '#7c1325',
         spacey: 'rgb(0, 112, 144)',
         arcade: '#84C318',
         fancy: '#E76F51'
@@ -40,7 +40,7 @@ module.exports = {
         }
       },
       animation: {
-        shutter: 'shutter 3s ease-in-out infinite',
+        shutter: 'shutter 2s ease-in-out infinite',
         quick_shutter: 'quick_shutter 1s ease-in-out',
         grow: 'grow .5s linear'
       },
