@@ -35,6 +35,9 @@ const themeConstants = {
 const theme = createTheme({
   mode: 'dark',
   palette: {
+    background: {
+      paper: '#1e293b'
+    }, 
     primary: {
       main: "#01A7C2",
       dark: "#01A7C2",
