@@ -1,3 +1,5 @@
+import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
+
 export interface Meme {
   setting: string;
   image: string;
@@ -11,4 +13,8 @@ export type NumIndexed = {
 
 export type StringIndexed = {
   [k: string]: string
+}
+
+export type ObjectOfElements = {
+  [k:number]: ReactJSXElement
 }

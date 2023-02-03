@@ -37,12 +37,27 @@ module.exports = {
         grow: {
           '0%': { transform: 'scaleY(0)', opacity: '0' },
           '100%': { transform: 'scaleY(1)', opacity: '1' }
+        },
+        growAll: {
+          '0%': { transform: 'scale(0)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' }
+        },
+        arrow_bounce: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(7px)' }
+        },
+        arrow_slide: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '50%': { transform: 'translateX(7px)' }
         }
       },
       animation: {
         shutter: 'shutter 2s ease-in-out infinite',
         quick_shutter: 'quick_shutter 1s ease-in-out',
-        grow: 'grow .5s linear'
+        grow: 'grow .5s linear',
+        growAll: 'growAll .5s linear',
+        arrow_bounce: 'arrow_bounce .5s ease-in-out infinite',
+        arrow_slide: 'arrow_slide .5s ease-in-out infinite'
       },
       fontFamily: {
         original: ['ui-sans-serif', 'system-ui'],

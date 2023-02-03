@@ -6,10 +6,13 @@ import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions'
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DownloadIcon from '@mui/icons-material/Download';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import Radio from '@mui/material/Radio'
+import Tooltip from '@mui/material/Tooltip'
+import Zoom from '@mui/material/Zoom'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import React, { 
@@ -22,7 +25,9 @@ import MemeDisplay from '../../components/MemeDisplay'
 import { Meme } from '../../types/types'
 import { toPng } from 'html-to-image'
 import { ReactJSXElement } from '@emotion/react/types/jsx-namespace'
-import { FormControlLabel, FormLabel, RadioGroup } from '@mui/material'
+import { Card, CardActions, CardContent, FormControlLabel, FormLabel, IconButton, RadioGroup } from '@mui/material'
+import HelpCard from '../../components/HelpCard'
+import { ConstructionOutlined } from '@mui/icons-material'
 
 type ObjectOfStrings = {
   [k: string]: string
@@ -32,6 +37,13 @@ type OptionsState = {
   [k: string]: JSX.Element[]
 }
 
+const blankMeme: Meme = {
+  setting: '',
+  image: '',
+  quote: '',
+  author: ''
+}
+
 const funpage = () => {
   const memeRef = useRef<HTMLDivElement | null>(null)
   const [meme, setMeme] = useState<Meme | null>(null)
@@ -39,23 +51,14 @@ const funpage = () => {
   const [memeMode, setMemeMode] = useState<string>('classic')
   const [memeTheme, setMemeTheme] = useState<string>('original')
   const [removeTempImage, setRemoveTempImage] = useState<boolean>(false)
-  const [customMemeOrder, setCustomMemeOrder] = useState<Meme>({
-    setting: '',
-    image: '',
-    quote: '',
-    author: ''
-  })
+  const [tutorialStage, setTutorialStage] = useState<number>(0)
+  const [customMemeOrder, setCustomMemeOrder] = useState<Meme>(blankMeme)
+  const [createMemeOrder, setCreateMemeOrder] = useState<Meme>(blankMeme)
   const [customOptions, setCustomOptions] = useState<OptionsState>({
     settingOptions: [],
     imageOptions:  [],
     quoteOptions: [],
     authorOptions: []
-  })
-  const [createMemeOrder, setCreateMemeOrder] = useState<Meme>({
-    setting: '',
-    image: '',
-    quote: '',
-    author: ''
   })
 
   const animation = loading ? 'animate-shutter' : ''
@@ -94,6 +97,9 @@ const funpage = () => {
       <MenuItem 
         value={option[1]} 
         key={option[0]}
+        sx={{
+          color: '#01A7C2'
+        }}
       >
         {option[0].replaceAll('_', ' ')}
       </MenuItem>
@@ -125,6 +131,9 @@ const funpage = () => {
   }, [customMemeOrder])
 
   const handleGetMeme = (): void => {
+    if(tutorialStage === 1) advanceTutorial(2)
+    if(tutorialStage === 3) advanceTutorial(4)
+    if(tutorialStage === 5) advanceTutorial(6)
     setLoading(true)
     let freshMeme = false; 
     if(memeMode !== 'create') {
@@ -174,11 +183,17 @@ const funpage = () => {
   }
 
   const handleClearMeme = (): void => {
+    if(tutorialStage === 2) advanceTutorial(3)
     setMeme(null)
+    setMemeTheme('original')
+    setCreateMemeOrder(blankMeme)
+    setCustomMemeOrder(blankMeme)
   }
 
   const HandleDownload = useCallback(() => {
-    if (memeRef.current === null) {
+    console.log('huh => ', tutorialStage)
+    if(tutorialStage === 6) {() => advanceTutorial(0)}
+    if(memeRef.current === null) {
       return
     }
     toPng(memeRef.current, { 
@@ -206,14 +221,29 @@ const funpage = () => {
   }
 
   const handleMemeType = (e: any): void => {
-    if(meme) setMeme(null)
     setMemeMode(e.target.value)
+    if(tutorialStage === 4) advanceTutorial(5)
+    handleClearMeme()
     if(e.target.value === 'create') setRemoveTempImage(true)
     else setRemoveTempImage(false)
   }
 
-  const handleMemeTheme = (e: any): void => {
+  const handleMemeTheme = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setMemeTheme(e.target.value)
+  }
+
+  const advanceTutorial = (num: number): void => {
+    console.log('huh? => ', num)
+    setTutorialStage(num)
+  }
+
+  const handleFinalAdvance = (): void => {
+    if(tutorialStage === 6) advanceTutorial(0)
+  }
+
+  const handleExitTutorial = (): void => {
+    console.log('hit that?')
+    advanceTutorial(0)
   }
 
   return (
@@ -221,10 +251,29 @@ const funpage = () => {
       <h1 className={`${fontFamilies[memeTheme]} text-warning text-6xl mb-4 `}>nerdMeme</h1>
       <p className='text-primary'>
         first time here?
-        <HelpOutlineIcon fontSize="medium" color="warning" className="ml-2 mb-1" />  
+        <Tooltip 
+          TransitionComponent={Zoom}
+          title='nerMeme generates jumbled memes, created from popular cinematic universes. Want the tour? Click this help icon for tutorial'
+        >
+          <IconButton onClick={() => advanceTutorial(1)}>
+            <HelpOutlineIcon 
+              color="warning" 
+              fontSize='medium'
+              className='ml-1 mb-1'
+            />
+          </IconButton>
+        </Tooltip>
       </p>
       <div className='text-primary text-xl mb-2'>Select your meme mode</div>
-      <div className='flex flex-row'>
+      <div className='relative flex flex-row'>
+        {tutorialStage === 4 && !loading &&
+          <HelpCard 
+            tutorialStage={4}
+            arrowDir='left'
+            messageId={4}
+            handleExitTutorial={() => handleExitTutorial}
+          />
+        }
         <div className='mx-3'> 
           <Button        
             onClick={handleMemeType}
@@ -259,8 +308,8 @@ const funpage = () => {
           </Button>
         </div>
       </div>
-      <div className='h-10 pt-4'>
-        { meme &&
+      <div className='relative h-10 pt-4'>
+        { meme && !loading &&
           <Button 
             variant='text' color='primary' 
             onClick={handleClearMeme}
@@ -268,11 +317,27 @@ const funpage = () => {
             {`Return to ${memeMode} meme-menu`}
           </Button>
         }
+        { meme && tutorialStage === 2 && !loading &&
+          <HelpCard 
+            tutorialStage={2}
+            arrowDir='down'
+            messageId={2}
+            handleExitTutorial={handleExitTutorial}
+          />
+        } 
       </div>
       <div className="px-0 relative overflow-hidden h-2/3 flex flex-row justify-center w-screen my-6 bg-primary ">
         { !meme && !loading && 
           <div className='mx-8 flex flex-col justify-center'>
-            <div className='h-2/3 flex items-center'>
+            <div className='relative h-2/3 flex items-center'>
+            {tutorialStage === 3 &&
+              <HelpCard 
+                tutorialStage={3}
+                arrowDir='left'
+                messageId={3}
+                handleExitTutorial={handleExitTutorial}
+              />
+            }
             <FormControl>
               {/* <FormLabel color='primary'>Select a meme-theme</FormLabel> */}
               <p className='text-xl'>Select a meme-theme</p>
@@ -357,8 +422,16 @@ const funpage = () => {
             </div>
           </div>
         }
-        { memeMode === 'custom' && !meme && ! loading &&
-          <div className="mx-8 flex flex-col justify-center">
+        { memeMode === 'custom' && !meme && !loading &&
+          <div className="relative mx-8 flex flex-col justify-center">
+            { tutorialStage === 5 &&
+              <HelpCard 
+                tutorialStage={5}
+                arrowDir='right'
+                messageId={5}
+                handleExitTutorial={handleExitTutorial}
+              />
+            } 
             <div className='text-xl'>Select a universe for each category!</div>
             <div className='my-4 min-w-[150px]'>
               <FormControl fullWidth>
@@ -512,7 +585,23 @@ const funpage = () => {
             } 
         ></div>
       </div>
-      <div className='flex flex-row'>
+      <div className='flex flex-row relative'>
+        {tutorialStage === 1 &&
+          <HelpCard 
+            tutorialStage={1}
+            arrowDir='down'
+            messageId={1}
+            handleExitTutorial={handleExitTutorial}
+          />
+        }
+        {tutorialStage === 6 && !loading &&
+          <HelpCard 
+            tutorialStage={6}
+            arrowDir='down'
+            messageId={6}
+            handleExitTutorial={handleExitTutorial}
+          />
+        } 
         <div className='m-3'>
           <Button
             onClick={handleGetMeme} 
@@ -524,7 +613,7 @@ const funpage = () => {
             get a meme!
           </Button>
         </div>
-        <div className='m-3'>
+        <div className='m-3' onClick={handleFinalAdvance}>
           <Button 
             onClick={HandleDownload} 
             variant="outlined" 
