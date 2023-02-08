@@ -18,3 +18,7 @@ export type StringIndexed = {
 export type ObjectOfElements = {
   [k:number]: ReactJSXElement
 }
+
+export type OptionsState = {
+  [k: string]: JSX.Element[]
+}

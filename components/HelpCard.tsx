@@ -80,7 +80,7 @@ const HelpCard:FunctionComponent<Props> = ({
   }
 
   return (
-    <div >
+    <div className="animate-fadeIn">
       <Card className={`
         ${positions[messageId]}
         absolute bg-slate-800

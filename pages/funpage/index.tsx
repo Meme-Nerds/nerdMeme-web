@@ -1,41 +1,35 @@
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import LinearProgress from '@mui/material/LinearProgress'
-import Box from '@mui/material/Box'
-import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions'
-import FileUploadIcon from '@mui/icons-material/FileUpload';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DownloadIcon from '@mui/icons-material/Download';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Radio from '@mui/material/Radio'
-import Tooltip from '@mui/material/Tooltip'
-import Zoom from '@mui/material/Zoom'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
 import React, { 
   useState,
   useCallback,
   useRef,  
   useEffect
 } from 'react'
+import {
+  TextField,
+  Button,
+  LinearProgress,
+  Box,
+  FormControl,
+  InputLabel,
+  Radio,
+  Tooltip,
+  Zoom,
+  MenuItem,
+  FormControlLabel,
+  IconButton,
+  RadioGroup
+} from '@mui/material'
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions'
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DownloadIcon from '@mui/icons-material/Download';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import Select, { SelectChangeEvent } from '@mui/material/Select'
 import MemeDisplay from '../../components/MemeDisplay'
-import { Meme } from '../../types/types'
+import { Meme, StringIndexed, OptionsState } from '../../types/types'
 import { toPng } from 'html-to-image'
 import { ReactJSXElement } from '@emotion/react/types/jsx-namespace'
-import { Card, CardActions, CardContent, FormControlLabel, FormLabel, IconButton, RadioGroup } from '@mui/material'
 import HelpCard from '../../components/HelpCard'
-import { ConstructionOutlined } from '@mui/icons-material'
-
-type ObjectOfStrings = {
-  [k: string]: string
-}
-
-type OptionsState = {
-  [k: string]: JSX.Element[]
-}
 
 const blankMeme: Meme = {
   setting: '',
@@ -54,6 +48,8 @@ const funpage = () => {
   const [tutorialStage, setTutorialStage] = useState<number>(0)
   const [customMemeOrder, setCustomMemeOrder] = useState<Meme>(blankMeme)
   const [createMemeOrder, setCreateMemeOrder] = useState<Meme>(blankMeme)
+  const [expandDisplayPortal, setExpandDisplayPortal] = useState<boolean>(false)
+  const [displayHeight, setDisplayHeight] = useState<string>('h-[60vh]')
   const [customOptions, setCustomOptions] = useState<OptionsState>({
     settingOptions: [],
     imageOptions:  [],
@@ -66,12 +62,12 @@ const funpage = () => {
   const customVariant = memeMode === 'custom' ? 'contained' : 'outlined'
   const createVariant = memeMode === 'create' ? 'contained' : 'outlined'
 
-  const routes: ObjectOfStrings = {
+  const routes: StringIndexed = {
     classic: '/api/meme',
     custom: `api/custom-meme/${customMemeOrder.setting}/${customMemeOrder.image}/${customMemeOrder.quote}/${customMemeOrder.author}`,
   }
 
-  const worlds: ObjectOfStrings = {
+  const worlds: StringIndexed = {
     Star_Wars: 'star-wars', 
     Star_Trek: 'star-trek',
     Middle_Earth: 'lotr',
@@ -81,7 +77,7 @@ const funpage = () => {
     Xena_Warrior_Princess: 'xena'
   }
 
-  const fontFamilies: ObjectOfStrings = {
+  const fontFamilies: StringIndexed = {
     original: 'font-original',
     olde: 'font-olde',
     arcade: 'font-arcade',
@@ -118,7 +114,7 @@ const funpage = () => {
       quoteOptions: [],
       authorOptions: []
     }
-    const optionToMemeComp: ObjectOfStrings = {
+    const optionToMemeComp: StringIndexed = {
       settingOptions: 'setting',
       imageOptions: 'image',
       quoteOptions: 'quote',
@@ -134,6 +130,7 @@ const funpage = () => {
     if(tutorialStage === 1) advanceTutorial(2)
     if(tutorialStage === 3) advanceTutorial(4)
     if(tutorialStage === 5) advanceTutorial(6)
+    handleExpandDisplay()
     setLoading(true)
     let freshMeme = false; 
     if(memeMode !== 'create') {
@@ -182,12 +179,20 @@ const funpage = () => {
     setCustomMemeOrder(newCustomMeme)
   }
 
+  const handleExpandDisplay = () => {
+    setExpandDisplayPortal(true)
+    setTimeout(() => {
+      setDisplayHeight('h-[80vh]')
+    }, 2000)
+  }
+
   const handleClearMeme = (): void => {
     if(tutorialStage === 2) advanceTutorial(3)
     setMeme(null)
     setMemeTheme('original')
     setCreateMemeOrder(blankMeme)
     setCustomMemeOrder(blankMeme)
+    setExpandDisplayPortal(false)
   }
 
   const HandleDownload = useCallback(() => {
@@ -233,7 +238,6 @@ const funpage = () => {
   }
 
   const advanceTutorial = (num: number): void => {
-    console.log('huh? => ', num)
     setTutorialStage(num)
   }
 
@@ -242,73 +246,86 @@ const funpage = () => {
   }
 
   const handleExitTutorial = (): void => {
-    console.log('hit that?')
     advanceTutorial(0)
   }
 
   return (
-    <div className="h-screen flex flex-col justify-center items-center bg-slate-800 p-6">
-      <h1 className={`${fontFamilies[memeTheme]} text-warning text-6xl mb-4 `}>nerdMeme</h1>
-      <p className='text-primary'>
-        first time here?
-        <Tooltip 
-          TransitionComponent={Zoom}
-          title='nerMeme generates jumbled memes, created from popular cinematic universes. Want the tour? Click this help icon for tutorial'
-        >
-          <IconButton onClick={() => advanceTutorial(1)}>
-            <HelpOutlineIcon 
-              color="warning" 
-              fontSize='medium'
-              className='ml-1 mb-1'
-            />
-          </IconButton>
-        </Tooltip>
-      </p>
-      <div className='text-primary text-xl mb-2'>Select your meme mode</div>
-      <div className='relative flex flex-row'>
-        {tutorialStage === 4 && !loading &&
-          <HelpCard 
-            tutorialStage={4}
-            arrowDir='left'
-            messageId={4}
-            handleExitTutorial={() => handleExitTutorial}
-          />
-        }
-        <div className='mx-3'> 
-          <Button        
-            onClick={handleMemeType}
-            variant={classicVariant}
-            value='classic'
-            name='classic'
-            color='primary'
-          >
-            classic
-          </Button>
+    <div className="relative h-screen bg-slate-800 p-6 w-screen flex flex-col justify-center items-center">
+
+      <h1 className={`
+        ${fontFamilies[memeTheme]} 
+        text-warning text-6xl mb-3 
+      `}
+      >
+        nerdMeme
+      </h1>
+
+      {!meme && !loading &&
+        <div className={`
+          flex flex-col items-center 
+        `}>
+          <p className='-mb-4 text-primary'>
+            first time here?
+            <Tooltip 
+              TransitionComponent={Zoom}
+              title='nerMeme generates jumbled memes, created from popular cinematic universes. Want the tour? Click help icon for tutorial'
+            >
+              <IconButton onClick={() => advanceTutorial(1)}>
+                <HelpOutlineIcon 
+                  color="warning" 
+                  fontSize='medium'
+                  className='ml-1 mb-1'
+                />
+              </IconButton>
+            </Tooltip>
+          </p>
+          <div className='text-primary text-xl mb-2'>Select your meme mode</div>
+          <div className='animate-fade_in relative flex flex-row'>
+            {tutorialStage === 4 && !loading &&
+              <HelpCard 
+                tutorialStage={4}
+                arrowDir='left'
+                messageId={4}
+                handleExitTutorial={() => handleExitTutorial}
+              />
+            }
+            <div className='mx-3'> 
+              <Button        
+                onClick={handleMemeType}
+                variant={classicVariant}
+                value='classic'
+                name='classic'
+                color='primary'
+              >
+                classic
+              </Button>
+            </div>
+            <div className='mx-3'>
+              <Button
+                onClick={handleMemeType}
+                variant={customVariant}
+                value='custom'
+                name='custom'
+                color='primary'
+              >
+                custom
+              </Button>
+            </div>
+            <div className='mx-3'>
+              <Button
+                onClick={handleMemeType}
+                variant={createVariant}
+                value='create'
+                name='create'
+                color='primary'
+              >
+                create
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className='mx-3'>
-          <Button
-            onClick={handleMemeType}
-            variant={customVariant}
-            value='custom'
-            name='custom'
-            color='primary'
-          >
-            custom
-          </Button>
-        </div>
-        <div className='mx-3'>
-          <Button
-            onClick={handleMemeType}
-            variant={createVariant}
-            value='create'
-            name='create'
-            color='primary'
-          >
-            create
-          </Button>
-        </div>
-      </div>
-      <div className='relative h-10 pt-4'>
+      }
+      <div className='relative h-10 py-2 mb-4'>
         { meme && !loading &&
           <Button 
             variant='text' color='primary' 
@@ -326,7 +343,12 @@ const funpage = () => {
           />
         } 
       </div>
-      <div className="px-0 relative overflow-hidden h-2/3 flex flex-row justify-center w-screen my-6 bg-primary ">
+      <div className={`
+        ${!expandDisplayPortal ? '' : 'animate-expand_display'}
+        ${displayHeight}
+        px-0 relative overflow-hidden flex flex-row justify-center 
+        w-screen my-4 bg-primary fixed bottom-[3vh]
+      `}>
         { !meme && !loading && 
           <div className='mx-8 flex flex-col justify-center'>
             <div className='relative h-2/3 flex items-center'>
@@ -561,7 +583,7 @@ const funpage = () => {
           </div>
         }
         { meme && !loading &&
-          <div ref={memeRef} className='animate-grow flex justify-center  max-h-contain max-w-fit border-2 border-primary'>
+          <div ref={memeRef} className=' min-h-2/3 max-h-3/4 overflow-y-visible animate-grow flex justify-center  max-h-contain max-w-fit border-2 border-primary'>
             <MemeDisplay 
               meme={meme} 
               removeImage={removeTempImage}
@@ -585,7 +607,7 @@ const funpage = () => {
             } 
         ></div>
       </div>
-      <div className='flex flex-row relative'>
+      <div className='flex flex-row relative items-center'>
         {tutorialStage === 1 &&
           <HelpCard 
             tutorialStage={1}
