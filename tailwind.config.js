@@ -27,7 +27,7 @@ module.exports = {
       keyframes: {
         shutter: {
           '0%, 100%': { transform: 'translateY(-200vh)' },
-          '50%': { transform: 'translateY(100vh)' }
+          '50%': { transform: 'translateY(150vh)' }
         },
         quick_shutter: {
           '0%': { transform: 'translateY(0)' },

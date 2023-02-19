@@ -17,8 +17,10 @@ import {
   MenuItem,
   FormControlLabel,
   IconButton,
-  RadioGroup
+  RadioGroup,
+  Snackbar,
 } from '@mui/material'
+import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions'
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -26,7 +28,13 @@ import DownloadIcon from '@mui/icons-material/Download';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import MemeDisplay from '../../components/MemeDisplay'
-import { Meme, StringIndexed, OptionsState } from '../../types/types'
+import { 
+  Meme, 
+  StringIndexed, 
+  OptionsState,
+  AlertInfo,
+  AlertType
+} from '../../types/types'
 import { toPng } from 'html-to-image'
 import { ReactJSXElement } from '@emotion/react/types/jsx-namespace'
 import HelpCard from '../../components/HelpCard'
@@ -50,13 +58,17 @@ const funpage = () => {
   const [createMemeOrder, setCreateMemeOrder] = useState<Meme>(blankMeme)
   const [expandDisplayPortal, setExpandDisplayPortal] = useState<boolean>(false)
   const [displayHeight, setDisplayHeight] = useState<string>('h-[60vh]')
+  const [showNotification, setShowNotification] = useState<boolean>(false)
   const [customOptions, setCustomOptions] = useState<OptionsState>({
     settingOptions: [],
     imageOptions:  [],
     quoteOptions: [],
     authorOptions: []
   })
-
+  const [alertInfo, setAlertInfo] = useState<AlertInfo>({
+    type: 'warning',
+    message: '',
+  })
   const animation = loading ? 'animate-shutter' : ''
   const classicVariant = memeMode === 'classic' ? 'contained' : 'outlined'
   const customVariant = memeMode === 'custom' ? 'contained' : 'outlined'
@@ -107,6 +119,30 @@ const funpage = () => {
     else return quote
   }
 
+  const notify =  (message: string, type: AlertType = 'warning') => {
+    setAlertInfo({
+      type,
+      message
+    })
+    setShowNotification(true)
+  }
+
+  const handleHideNotification = (): void => {
+    setShowNotification(false)
+  }
+
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>((
+    props,
+    ref
+  ) => {
+    return <MuiAlert 
+      elevation={6}
+      ref={ref}
+      variant='filled'
+      {...props}
+    />
+  })
+
   useEffect(() => {
     const newState: OptionsState = {
       settingOptions: [],
@@ -130,6 +166,16 @@ const funpage = () => {
     if(tutorialStage === 1) advanceTutorial(2)
     if(tutorialStage === 3) advanceTutorial(4)
     if(tutorialStage === 5) advanceTutorial(6)
+    console.log('mememode ', memeMode)
+    console.log('this => ', Object.values(customMemeOrder).includes(''))
+    if(memeMode === 'custom' && Object.values(customMemeOrder).includes('')) {
+      return notify('You must select a universe for each category!')
+    }
+    if(memeMode === 'create') {
+      if(createMemeOrder.image === '' || createMemeOrder.quote === '') {
+        return notify('You must at least upload an image and write in a quote to create a meme!')
+      }
+    }
     handleExpandDisplay()
     setLoading(true)
     let freshMeme = false; 
@@ -182,7 +228,7 @@ const funpage = () => {
   const handleExpandDisplay = () => {
     setExpandDisplayPortal(true)
     setTimeout(() => {
-      setDisplayHeight('h-[80vh]')
+      setDisplayHeight('h-[80vh] max-h-fit')
     }, 2000)
   }
 
@@ -250,7 +296,10 @@ const funpage = () => {
   }
 
   return (
-    <div className="relative h-screen bg-slate-800 p-6 w-screen flex flex-col justify-center items-center">
+    <div className="
+      relative h-screen bg-slate-800 p-6 w-screen 
+      flex flex-col justify-center items-center
+    ">
 
       <h1 className={`
         ${fontFamilies[memeTheme]} 
@@ -328,7 +377,8 @@ const funpage = () => {
       <div className='relative h-10 py-2 mb-4'>
         { meme && !loading &&
           <Button 
-            variant='text' color='primary' 
+            variant='text' 
+            color='primary' 
             onClick={handleClearMeme}
           >
             {`Return to ${memeMode} meme-menu`}
@@ -347,7 +397,7 @@ const funpage = () => {
         ${!expandDisplayPortal ? '' : 'animate-expand_display'}
         ${displayHeight}
         px-0 relative overflow-hidden flex flex-row justify-center 
-        w-screen my-4 bg-primary fixed bottom-[3vh]
+        items-center w-screen my-4 bg-primary fixed bottom-[3vh]
       `}>
         { !meme && !loading && 
           <div className='mx-8 flex flex-col justify-center'>
@@ -583,12 +633,15 @@ const funpage = () => {
           </div>
         }
         { meme && !loading &&
-          <div ref={memeRef} className=' min-h-2/3 max-h-3/4 overflow-y-visible animate-grow flex justify-center  max-h-contain max-w-fit border-2 border-primary'>
-            <MemeDisplay 
-              meme={meme} 
-              removeImage={removeTempImage}
-              memeTheme={memeTheme} 
-            />
+          <div className='h-full max-h-[600px] flex justify-center items-center'>
+            <div ref={memeRef} className=' min-h-2/3 h-full  overflow-y-visible animate-grow flex justify-center max-h-contain max-w-fit border-2 border-primary'>
+              <MemeDisplay 
+                meme={meme} 
+                removeImage={removeTempImage}
+                memeTheme={memeTheme} 
+                notify={notify}
+              />
+            </div>
           </div>
         }
         { loading && 
@@ -600,11 +653,11 @@ const funpage = () => {
           </div>
         }
         <div 
-          className={
-            `
-            transition-all absolute translate-y-[-200vh] bg-secondary_alpha w-screen h-[200vh]
-            ${animation}`
-            } 
+          className={`
+            transition-all absolute translate-y-[-200vh] 
+            bg-secondary_alpha w-screen h-[200vh]
+            ${animation}
+            `} 
         ></div>
       </div>
       <div className='flex flex-row relative items-center'>
@@ -647,6 +700,15 @@ const funpage = () => {
           </Button>
         </div>
       </div>
+      <Snackbar 
+        open={showNotification} 
+        autoHideDuration={5000} 
+        onClose={handleHideNotification}
+      >
+        <Alert severity={alertInfo.type} sx={{ width: '100%' }}> 
+          {alertInfo.message}
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

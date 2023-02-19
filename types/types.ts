@@ -22,3 +22,10 @@ export type ObjectOfElements = {
 export type OptionsState = {
   [k: string]: JSX.Element[]
 }
+
+export type AlertType =  'warning' | 'error' | 'info' | 'success'
+
+export type AlertInfo = {
+  type: AlertType,
+  message: string
+}
