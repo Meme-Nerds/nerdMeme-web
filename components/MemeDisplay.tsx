@@ -1,17 +1,19 @@
 import { FunctionComponent, useEffect, useRef, useState } from "react"
-import { Meme, StringIndexed, NumIndexed } from "../types/types"
+import { Meme, StringIndexed, NumIndexed, AlertType } from "../types/types"
 import Canvas from './Canvas'
 
 type Props = {
   meme: Meme,
   removeImage: boolean,
   memeTheme: string,
+  notify: (message: string, type: AlertType) => void
 }
 
 const MemeDisplay:FunctionComponent<Props> = ({ 
   meme, 
   removeImage,
-  memeTheme
+  memeTheme,
+  notify
 }) => {
   const { setting, image, quote, author } = meme
   const memeRef = useRef<HTMLDivElement | null>(null)
@@ -62,7 +64,7 @@ const MemeDisplay:FunctionComponent<Props> = ({
 
   const getQuoteSize = ():string => {
     let qSize: number = 0
-    const qLength = quote.length
+    const qLength = quote.length // average 45.24
     const iWidth = imageBoxWidth
     const mHeight = memeRef.current
       ? memeRef.current.clientHeight
@@ -120,18 +122,29 @@ const MemeDisplay:FunctionComponent<Props> = ({
   //   }
   }
 
-  useEffect(() => {
-    setTimeout(() => {
-      if(imgRef.current?.clientWidth && imgRef.current.clientWidth > 0) {
-        console.log('hit it number 1')
-        setImageBoxHeight(imgRef.current.clientHeight)
-        setImageBoxWidth(imgRef.current.clientWidth)
-        if(removeImage) {
-          setNoImageYesCanvas(true)
+  const determineImageSize = () => {
+   setTimeout(() => {
+    let count = 1
+      if(!sizeMeme) {
+        console.log('recursion-count => ', count)
+        count ++
+        if(imgRef.current?.clientWidth && imgRef.current.clientWidth > 0) {
+          console.log('hit it number 1')
+          setImageBoxHeight(imgRef.current.clientHeight)
+          setImageBoxWidth(imgRef.current.clientWidth)
+          if(removeImage) {
+            setNoImageYesCanvas(true)
+          }
+          setSizeMeme(true)
+        } else {
+          determineImageSize()
         }
-        setSizeMeme(true)
       }
     }, 200)
+  }
+
+  useEffect(() => {
+    determineImageSize()
   }, [meme])
 
   useEffect(() => {
@@ -153,19 +166,21 @@ const MemeDisplay:FunctionComponent<Props> = ({
         <div className="
           overflow-y-visible h-full max-w-contain flex flex-col justify-around items-center
         ">
-          <div className={`
-            ${quoteBoxWidth}
-            max-h-[50px] flex flex-col justify-center flex-initial h-[50px]
-            `}>
-            <p className={`
-              ${secondaryTextColors[memeTheme]} 
-              ${secondaryTextSize}
+          {setting &&
+            <div className={`
               ${quoteBoxWidth}
-              px-4
-            `}>
-              { setting }
-            </p>
-          </div>
+              max-h-[50px] flex flex-col justify-center flex-initial h-[50px]
+              `}>
+              <p className={`
+                ${secondaryTextColors[memeTheme]} 
+                ${secondaryTextSize}
+                ${quoteBoxWidth}
+                px-4
+              `}>
+                { setting }
+              </p>
+            </div>
+          }
           {!noImageYesCanvas &&
             <div
               ref={imgRef}
@@ -207,14 +222,16 @@ const MemeDisplay:FunctionComponent<Props> = ({
             >
                 "{ quote }"
             </p>
-            <p className={`
-              ${secondaryTextColors[memeTheme]} 
-              ${secondaryTextSize}
-              ${quoteBoxWidth}
-              px-6
-            `}>
-              ~ { author }
-            </p> 
+            {author &&
+              <p className={`
+                ${secondaryTextColors[memeTheme]} 
+                ${secondaryTextSize}
+                ${quoteBoxWidth}
+                px-6
+              `}>
+                ~ { author }
+              </p> 
+            }
           </div>
         </div>
         <div className="absolute top-0 translate-y-[-100%] border-2 border-secondary h-full w-full bg-secondary_alpha animate-quick_shutter"></div>
