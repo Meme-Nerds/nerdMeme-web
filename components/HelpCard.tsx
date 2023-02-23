@@ -71,8 +71,8 @@ const HelpCard:FunctionComponent<Props> = ({
   }
 
   const positions: NumIndexed = {
-    1: 'left-20 -top-44',
-    2: 'left-10 -top-28',
+    1: 'left-20 -top-40',
+    2: 'left-72 -top-20',
     3: 'left-44 top-20',
     4: 'left-60 -top-32',
     5: '-left-60 top-16',

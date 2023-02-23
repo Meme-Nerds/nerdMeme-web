@@ -166,8 +166,6 @@ const funpage = () => {
     if(tutorialStage === 1) advanceTutorial(2)
     if(tutorialStage === 3) advanceTutorial(4)
     if(tutorialStage === 5) advanceTutorial(6)
-    console.log('mememode ', memeMode)
-    console.log('this => ', Object.values(customMemeOrder).includes(''))
     if(memeMode === 'custom' && Object.values(customMemeOrder).includes('')) {
       return notify('You must select a universe for each category!')
     }
@@ -242,10 +240,10 @@ const funpage = () => {
   }
 
   const HandleDownload = useCallback(() => {
-    console.log('huh => ', tutorialStage)
+    
     if(tutorialStage === 6) {() => advanceTutorial(0)}
     if(memeRef.current === null) {
-      return
+      return notify('Nothing to download yet. Get a meme first!')
     }
     toPng(memeRef.current, { 
       cacheBust: true, 
@@ -273,6 +271,7 @@ const funpage = () => {
 
   const handleMemeType = (e: any): void => {
     setMemeMode(e.target.value)
+    setMemeTheme('original')
     if(tutorialStage === 4) advanceTutorial(5)
     handleClearMeme()
     if(e.target.value === 'create') setRemoveTempImage(true)
@@ -284,6 +283,11 @@ const funpage = () => {
   }
 
   const advanceTutorial = (num: number): void => {
+    console.log('cur stage => ', tutorialStage)
+    console.log('new-tut-stage => ', num)
+    if(num === 1) {
+      setMemeMode('classic')
+    }
     setTutorialStage(num)
   }
 
@@ -294,6 +298,8 @@ const funpage = () => {
   const handleExitTutorial = (): void => {
     advanceTutorial(0)
   }
+
+  const tutorialStageisTwoOrFour = tutorialStage === 2 || tutorialStage === 4
 
   return (
     <div className="
@@ -313,11 +319,11 @@ const funpage = () => {
         <div className={`
           flex flex-col items-center 
         `}>
-          <p className='-mb-4 text-primary'>
+          <p className=' text-primary underline'>
             first time here?
             <Tooltip 
               TransitionComponent={Zoom}
-              title='nerMeme generates jumbled memes, created from popular cinematic universes. Want the tour? Click help icon for tutorial'
+              title='nerdMeme generates jumbled memes, created from popular cinematic universes. Want the tour? Click help icon for a quick tutorial.'
             >
               <IconButton onClick={() => advanceTutorial(1)}>
                 <HelpOutlineIcon 
@@ -384,10 +390,10 @@ const funpage = () => {
             {`Return to ${memeMode} meme-menu`}
           </Button>
         }
-        { meme && tutorialStage === 2 && !loading &&
+        {meme && tutorialStageisTwoOrFour && !loading &&
           <HelpCard 
             tutorialStage={2}
-            arrowDir='down'
+            arrowDir='left'
             messageId={2}
             handleExitTutorial={handleExitTutorial}
           />
@@ -425,6 +431,7 @@ const funpage = () => {
                   label='original'
                   control={
                     <Radio 
+                      checked={memeTheme === 'original'}
                       sx={{
                         '&.Mui-checked': {
                           color: '#E76F51',
@@ -439,6 +446,7 @@ const funpage = () => {
                   label='olde'
                   control={
                     <Radio
+                      checked={memeTheme === 'olde'}
                       sx={{
                         '&.Mui-checked': {
                           color: '#E76F51',
@@ -453,6 +461,7 @@ const funpage = () => {
                   label='arcade'
                   control={
                     <Radio 
+                      checked={memeTheme === 'arcade'}
                       sx={{
                         '&.Mui-checked': {
                           color: '#E76F51',
@@ -467,6 +476,7 @@ const funpage = () => {
                   label='spacey'
                   control={
                     <Radio 
+                      checked={memeTheme === 'spacey'}
                       sx={{
                         '&.Mui-checked': {
                           color: '#E76F51',
@@ -481,6 +491,7 @@ const funpage = () => {
                   label='fancy'
                   control={
                     <Radio 
+                      checked={memeTheme === 'fancy'}
                       sx={{
                         '&.Mui-checked': {
                           color: '#E76F51',
@@ -685,7 +696,7 @@ const funpage = () => {
             size="large"
             endIcon={<EmojiEmotionsIcon color="warning" />}
           >
-            get a meme!
+            get a meme
           </Button>
         </div>
         <div className='m-3' onClick={handleFinalAdvance}>

@@ -91,11 +91,11 @@ const MemeDisplay:FunctionComponent<Props> = ({
 
     if(iWidth <= 300 && qLength > 100) qSize = 0
 
-    console.log('image-height ', imageBoxHeight)
-    console.log('meme-height ', mHeight)
-    console.log('length ', qLength)
-    console.log('width ', iWidth)
-    console.log('size ', qSize)
+    // console.log('image-height ', imageBoxHeight)
+    // console.log('meme-height ', mHeight)
+    // console.log('length ', qLength)
+    // console.log('width ', iWidth)
+    // console.log('size ', qSize)
     return textSizes[qSize]
   }
 
@@ -129,7 +129,6 @@ const MemeDisplay:FunctionComponent<Props> = ({
         console.log('recursion-count => ', count)
         count ++
         if(imgRef.current?.clientWidth && imgRef.current.clientWidth > 0) {
-          console.log('hit it number 1')
           setImageBoxHeight(imgRef.current.clientHeight)
           setImageBoxWidth(imgRef.current.clientWidth)
           if(removeImage) {
