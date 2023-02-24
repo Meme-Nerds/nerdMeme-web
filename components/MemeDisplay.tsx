@@ -82,7 +82,6 @@ const MemeDisplay:FunctionComponent<Props> = ({
     if(iWidth < 350 && qSize > 1) qSize --
     if(iWidth < 500 && qLength >= 75) qSize --
     if(iWidth > 700 && qLength <= 50 && qSize < 4) qSize ++
-    // if(iWidth < 700 && qLength > 125 && qSize > 1) qSize --
     
 
     if(mHeight && mHeight < 400 && qSize > 1) qSize -- 
@@ -91,11 +90,11 @@ const MemeDisplay:FunctionComponent<Props> = ({
 
     if(iWidth <= 300 && qLength > 100) qSize = 0
 
-    // console.log('image-height ', imageBoxHeight)
-    // console.log('meme-height ', mHeight)
-    // console.log('length ', qLength)
-    // console.log('width ', iWidth)
-    // console.log('size ', qSize)
+    console.log('image-height ', imageBoxHeight)
+    console.log('meme-height ', mHeight)
+    console.log('length ', qLength)
+    console.log('width ', iWidth)
+    console.log('size ', qSize)
     return textSizes[qSize]
   }
 

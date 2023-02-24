@@ -36,10 +36,14 @@ const HelpCard:FunctionComponent<Props> = ({
     </p>
 
   const messageThree =
-    <p className="whitespace-nowrap">
-      Why not try a meme theme?!
+  <>
+    <p>
+      Why not try a meme theme?
     </p>
-
+    <p className="whitespace-nowrap">
+      Select one then Get A Meme! 
+    </p>
+  </>
   const messageFour =
     <>
       <p className="whitespace-nowrap">
